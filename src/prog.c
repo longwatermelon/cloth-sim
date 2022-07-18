@@ -32,7 +32,7 @@ void prog_free(struct Prog *p)
 void prog_mainloop(struct Prog *p)
 {
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    /* glEnable(GL_CULL_FACE); */
 
     glfwSetCursorPos(p->win, 400.f, 300.f);
     glfwSetInputMode(p->win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
