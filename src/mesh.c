@@ -46,6 +46,11 @@ struct Mesh *mesh_alloc()
 void mesh_free(struct Mesh *m)
 {
     free(m->verts);
+    free(m->indices);
+
+    glDeleteVertexArrays(1, &m->vao);
+    glDeleteBuffers(1, &m->vb);
+
     free(m);
 }
 
