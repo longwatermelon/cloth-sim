@@ -109,13 +109,28 @@ void mesh_update(struct Mesh *m, float dt)
         if (i == 35 || i == 286)
             continue;
 
-        vec3 move = { 0.f, 0.f, 0.f };
 
         // gravity
         vec3 g = { 0.f, -.098f, 0.f };
         glm_vec3_add(m->masses[i].vel, g, m->masses[i].vel);
-        glm_vec3_add(move, g, move);
 
+        // air resistance
+        vec3 drag;
+
+        vec3 vsq;
+        /* glm_vec3_mul(m->masses[i].vel, m->masses[i].vel, vsq); */
+        vec3 sign;
+        glm_vec3_sign(m->masses[i].vel, sign);
+
+        glm_vec3_mul(m->masses[i].vel, m->masses[i].vel, vsq);
+        glm_vec3_mul(vsq, sign, vsq);
+
+        glm_vec3_copy(m->masses[i].vel, vsq);
+
+        glm_vec3_scale(vsq, .01f, drag);
+        glm_vec3_sub(m->masses[i].vel, drag, m->masses[i].vel);
+
+        vec3 move;
         glm_vec3_scale(m->masses[i].vel, dt, move);
         glm_vec3_add(m->masses[i].vert->pos, move, m->masses[i].vert->pos);
     }
