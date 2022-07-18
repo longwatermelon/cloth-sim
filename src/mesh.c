@@ -33,8 +33,8 @@ void spring_force(struct Spring *s, struct Mass *m, vec3 out)
 struct Mesh *mesh_alloc()
 {
     struct Mesh *m = malloc(sizeof(struct Mesh));
-    m->size = 50;
-    m->res = .5f;
+    m->size = 100;
+    m->res = .2f;
 
     m->verts = 0;
     m->nverts = 0;
@@ -214,7 +214,7 @@ void mesh_gen_springs(struct Mesh *m)
 
     size_t index = 0;
 
-    float k = 1000.f;
+    float k = 1200.f;
     float eq_len = m->res;
     float eq_len_diag = sqrtf(m->res * m->res * 2.f);
 
