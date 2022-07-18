@@ -42,8 +42,13 @@ void prog_mainloop(struct Prog *p)
 
     struct Mesh *mesh = mesh_alloc();
 
+    float prev = glfwGetTime();
+
     while (!glfwWindowShouldClose(p->win))
     {
+        float dt = glfwGetTime() - prev;
+        prev = glfwGetTime();
+
         double mx, my;
         glfwGetCursorPos(p->win, &mx, &my);
 
@@ -52,6 +57,8 @@ void prog_mainloop(struct Prog *p)
         prev_my = my;
 
         prog_events(p);
+
+        mesh_update(mesh, dt);
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -64,7 +71,7 @@ void prog_mainloop(struct Prog *p)
         shader_mat4(p->ri->shader, "view", p->ri->view);
         shader_mat4(p->ri->shader, "projection", p->ri->proj);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */
         mesh_render(mesh, p->ri);
         /* glBindVertexArray(vao); */
         /* glDrawArrays(GL_TRIANGLES, 0, 3); */

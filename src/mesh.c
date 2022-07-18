@@ -4,6 +4,31 @@
 #include <string.h>
 #include <glad/glad.h>
 
+void mass_apply_force(struct Mass *m, vec3 f, float dt)
+{
+    // dp = Ft
+    vec3 dp;
+    glm_vec3_scale(f, dt, dp);
+
+    // v += dp / m
+    vec3 dv;
+    glm_vec3_divs(dp, m->mass, dv);
+    glm_vec3_add(m->vel, dv, m->vel);
+}
+
+void spring_force(struct Spring *s, struct Mass *m, vec3 out)
+{
+    struct Mass *m2 = (m == s->ma ? s->mb : s->ma);
+
+    float dist = glm_vec3_distance(m->vert->pos, m2->vert->pos);
+    float left = s->k * (s->eq_len - dist);
+
+    vec3 diff;
+    glm_vec3_sub(m->vert->pos, m2->vert->pos, diff);
+    glm_vec3_divs(diff, dist, diff);
+
+    glm_vec3_scale(diff, left, out);
+}
 
 struct Mesh *mesh_alloc()
 {
@@ -63,6 +88,39 @@ void mesh_free(struct Mesh *m)
 }
 
 
+void mesh_update(struct Mesh *m, float dt)
+{
+    for (size_t i = 0; i < m->nsprings; ++i)
+    {
+        struct Spring *s = &m->springs[i];
+
+        vec3 fa, fb;
+        spring_force(s, s->ma, fa);
+        spring_force(s, s->mb, fb);
+
+        mass_apply_force(s->ma, fa, dt);
+        mass_apply_force(s->mb, fb, dt);
+    }
+
+    for (size_t i = 0; i < m->nmasses; ++i)
+    {
+        if (i == m->size * m->size - 1 || i == m->size * m->size - m->size)
+            continue;
+
+        vec3 g = { 0.f, -.098f, 0.f };
+        glm_vec3_add(m->masses[i].vel, g, m->masses[i].vel);
+
+        vec3 move;
+        glm_vec3_scale(m->masses[i].vel, dt, move);
+        glm_vec3_add(m->masses[i].vert->pos, move, m->masses[i].vert->pos);
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, m->vb);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, m->nverts * sizeof(Vertex), m->verts);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+
 void mesh_render(struct Mesh *m, RenderInfo *ri)
 {
     mat4 model;
@@ -80,6 +138,8 @@ void mesh_render(struct Mesh *m, RenderInfo *ri)
 
 void mesh_construct(struct Mesh *m)
 {
+    m->verts = malloc(sizeof(Vertex) * (m->size * m->size));
+
     for (int y = 0; y < m->size; ++y)
     {
         for (int z = 0; z < m->size; ++z)
@@ -89,8 +149,7 @@ void mesh_construct(struct Mesh *m)
                 { (float)(y * 10) / 100.f, 1.f - (float)(y * 10) / 100.f, 1.f - (float)(z * 10) / 100.f }
             };
 
-            m->verts = realloc(m->verts, sizeof(Vertex) * ++m->nverts);
-            m->verts[m->nverts - 1] = v;
+            m->verts[m->nverts++] = v;
 
             m->masses = realloc(m->masses, sizeof(struct Mass) * ++m->nmasses);
             m->masses[m->nmasses - 1] = (struct Mass){ 1.f, { 0.f, 0.f, 0.f }, &m->verts[m->nverts - 1] };
@@ -131,8 +190,9 @@ void mesh_gen_springs(struct Mesh *m)
 
     size_t index = 0;
 
-    float k = 10.f;
+    float k = 100.f;
     float eq_len = 1.f;
+    float eq_len_diag = sqrtf(2.f);
 
     // horizontal and vertical
     for (size_t y = 0; y < m->size; ++y)
@@ -159,8 +219,8 @@ void mesh_gen_springs(struct Mesh *m)
         for (size_t z = 0; z < m->size - 1; ++z)
         {
             size_t mi = y * m->size + z;
-            m->springs[index++] = (struct Spring){ &m->masses[mi], &m->masses[mi + m->size + 1], k, eq_len };
-            m->springs[index++] = (struct Spring){ &m->masses[mi + m->size], &m->masses[mi + 1], k, eq_len };
+            m->springs[index++] = (struct Spring){ &m->masses[mi], &m->masses[mi + m->size + 1], k, eq_len_diag };
+            m->springs[index++] = (struct Spring){ &m->masses[mi + m->size], &m->masses[mi + 1], k, eq_len_diag };
         }
     }
 }
