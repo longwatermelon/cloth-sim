@@ -33,7 +33,8 @@ void spring_force(struct Spring *s, struct Mass *m, vec3 out)
 struct Mesh *mesh_alloc()
 {
     struct Mesh *m = malloc(sizeof(struct Mesh));
-    m->size = 10;
+    m->size = 50;
+    m->res = .5f;
 
     m->verts = 0;
     m->nverts = 0;
@@ -104,7 +105,8 @@ void mesh_update(struct Mesh *m, float dt)
 
     for (size_t i = 0; i < m->nmasses; ++i)
     {
-        if (i == m->size * m->size - 1 || i == m->size * m->size - m->size)
+        /* if (i == m->size * m->size - 1 || i == m->size * m->size - m->size) */
+        if (i == 35 || i == 286)
             continue;
 
         vec3 move = { 0.f, 0.f, 0.f };
@@ -148,8 +150,8 @@ void mesh_construct(struct Mesh *m)
         for (int z = 0; z < m->size; ++z)
         {
             Vertex v = {
-                { 5.f, y, z },
-                { (float)(y * 10) / 100.f, 1.f - (float)(y * 10) / 100.f, 1.f - (float)(z * 10) / 100.f }
+                { (float)y * m->res, -.4f, (float)z * m->res },
+                { (float)y / m->size, (float)z / m->size, (float)z / m->size }
             };
 
             m->verts[m->nverts++] = v;
@@ -157,7 +159,7 @@ void mesh_construct(struct Mesh *m)
             m->masses = realloc(m->masses, sizeof(struct Mass) * ++m->nmasses);
             m->masses[m->nmasses - 1] = (struct Mass){ 1.f, { 0.f, 0.f, 0.f }, &m->verts[m->nverts - 1] };
 
-            if (y != 9 && z != 9)
+            if (y != m->size - 1 && z != m->size - 1)
             {
                 unsigned int i = y * m->size + z;
                 unsigned int ta[3], tb[3];
@@ -193,9 +195,9 @@ void mesh_gen_springs(struct Mesh *m)
 
     size_t index = 0;
 
-    float k = 100.f;
-    float eq_len = 1.f;
-    float eq_len_diag = sqrtf(2.f);
+    float k = 1000.f;
+    float eq_len = m->res;
+    float eq_len_diag = sqrtf(m->res * m->res * 2.f);
 
     // horizontal and vertical
     for (size_t y = 0; y < m->size; ++y)

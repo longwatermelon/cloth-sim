@@ -30,6 +30,7 @@ void spring_force(struct Spring *s, struct Mass *m, vec3 out);
 struct Mesh
 {
     int size;
+    float res;
 
     Vertex *verts;
     size_t nverts;
