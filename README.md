@@ -1,3 +1,4 @@
-# gl-template
+# cloth
 
-Template for future opengl projects with custom meshes
+Cloth simulation using springs
+
