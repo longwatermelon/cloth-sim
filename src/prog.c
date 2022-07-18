@@ -1,4 +1,5 @@
 #include "prog.h"
+#include "mesh.h"
 #include <stb/stb_image.h>
 #include <stdlib.h>
 
@@ -39,25 +40,7 @@ void prog_mainloop(struct Prog *p)
     double prev_mx, prev_my;
     glfwGetCursorPos(p->win, &prev_mx, &prev_my);
 
-    float verts[] = {
-        2.f, 0.f, 0.f,
-        2.f, -1.f, 0.f,
-        2.f, -1.f, 1.f
-    };
-
-    unsigned int vao, vb;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glGenBuffers(1, &vb);
-    glBindBuffer(GL_ARRAY_BUFFER, vb);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-    glEnableVertexAttribArray(0);
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    struct Mesh *mesh = mesh_alloc();
 
     while (!glfwWindowShouldClose(p->win))
     {
@@ -78,19 +61,20 @@ void prog_mainloop(struct Prog *p)
         cam_set_props(p->cam, p->ri->shader);
         cam_view_mat(p->cam, p->ri->view);
 
-        mat4 model;
-        glm_mat4_identity(model);
-        shader_mat4(p->ri->shader, "model", model);
         shader_mat4(p->ri->shader, "view", p->ri->view);
         shader_mat4(p->ri->shader, "projection", p->ri->proj);
 
-        glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        mesh_render(mesh, p->ri);
+        /* glBindVertexArray(vao); */
+        /* glDrawArrays(GL_TRIANGLES, 0, 3); */
+        /* glBindVertexArray(0); */
 
         glfwSwapBuffers(p->win);
         glfwPollEvents();
     }
+
+    mesh_free(mesh);
 }
 
 
