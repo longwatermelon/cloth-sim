@@ -23,9 +23,9 @@ struct Mesh
 struct Mesh *mesh_alloc();
 void mesh_free(struct Mesh *m);
 
-void mesh_construct(struct Mesh *m);
-
 void mesh_render(struct Mesh *m, RenderInfo *ri);
+
+void mesh_construct(struct Mesh *m);
 
 #endif
 

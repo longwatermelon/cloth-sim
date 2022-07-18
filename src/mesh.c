@@ -50,6 +50,21 @@ void mesh_free(struct Mesh *m)
 }
 
 
+void mesh_render(struct Mesh *m, RenderInfo *ri)
+{
+    mat4 model;
+    glm_mat4_identity(model);
+
+    shader_mat4(ri->shader, "model", model);
+
+    glBindVertexArray(m->vao);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ib);
+    glDrawElements(GL_TRIANGLES, m->nindices, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+
 void mesh_construct(struct Mesh *m)
 {
     for (int y = 0; y < 10; ++y)
@@ -88,20 +103,5 @@ void mesh_construct(struct Mesh *m)
             }
         }
     }
-}
-
-
-void mesh_render(struct Mesh *m, RenderInfo *ri)
-{
-    mat4 model;
-    glm_mat4_identity(model);
-
-    shader_mat4(ri->shader, "model", model);
-
-    glBindVertexArray(m->vao);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ib);
-    glDrawElements(GL_TRIANGLES, m->nindices, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
