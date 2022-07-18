@@ -107,10 +107,13 @@ void mesh_update(struct Mesh *m, float dt)
         if (i == m->size * m->size - 1 || i == m->size * m->size - m->size)
             continue;
 
+        vec3 move = { 0.f, 0.f, 0.f };
+
+        // gravity
         vec3 g = { 0.f, -.098f, 0.f };
         glm_vec3_add(m->masses[i].vel, g, m->masses[i].vel);
+        glm_vec3_add(move, g, move);
 
-        vec3 move;
         glm_vec3_scale(m->masses[i].vel, dt, move);
         glm_vec3_add(m->masses[i].vert->pos, move, m->masses[i].vert->pos);
     }
