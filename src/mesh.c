@@ -230,7 +230,7 @@ void mesh_construct(struct Mesh *m)
             m->verts[m->nverts++] = v;
 
             m->masses = realloc(m->masses, sizeof(struct Mass) * ++m->nmasses);
-            m->masses[m->nmasses - 1] = (struct Mass){ 1.f, { 0.f, 0.f, 0.f }, &m->verts[m->nverts - 1] };
+            m->masses[m->nmasses - 1] = (struct Mass){ .5f, { 0.f, 0.f, 0.f }, &m->verts[m->nverts - 1] };
 
             if (y != m->size - 1 && z != m->size - 1)
             {
