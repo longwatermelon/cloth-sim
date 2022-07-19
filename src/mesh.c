@@ -34,7 +34,7 @@ struct Mesh *mesh_alloc()
 {
     struct Mesh *m = malloc(sizeof(struct Mesh));
     m->size = 100;
-    m->res = .2f;
+    m->res = .5f;
 
     m->verts = 0;
     m->nverts = 0;
@@ -64,7 +64,7 @@ struct Mesh *mesh_alloc()
     glEnableVertexAttribArray(0);
 
     // color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, col));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, norm));
     glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
@@ -139,6 +139,8 @@ void mesh_update(struct Mesh *m, float dt)
         glm_vec3_add(m->masses[i].vert->pos, move, m->masses[i].vert->pos);
     }
 
+    mesh_calculate_normals(m);
+
     glBindBuffer(GL_ARRAY_BUFFER, m->vb);
     glBufferSubData(GL_ARRAY_BUFFER, 0, m->nverts * sizeof(Vertex), m->verts);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -159,6 +161,44 @@ void mesh_render(struct Mesh *m, RenderInfo *ri)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+static bool in_range(struct Mesh *m, size_t a, size_t b)
+{
+    return a >= 0 && a < m->nverts &&
+           a >= 0 && a < m->nverts;
+}
+
+static void compute_face_norm(struct Mesh *m, size_t a, size_t b, vec3 out)
+{
+    if (in_range(m, a, b))
+        glm_vec3_cross(m->verts[a].pos, m->verts[b].pos, out);
+}
+
+void mesh_calculate_normals(struct Mesh *m)
+{
+    for (size_t i = 0; i < m->nindices; ++i)
+    {
+        size_t index = m->indices[i];
+        int s = m->size;
+
+        vec3 norms[6];
+        for (int i = 0; i < 6; ++i) glm_vec3_zero(norms[i]);
+
+        compute_face_norm(m, index - s - 1,  index - 1,      norms[0]);
+        compute_face_norm(m, index - s,      index - s - 1,  norms[1]);
+        compute_face_norm(m, index + 1,      index - s,      norms[2]);
+        compute_face_norm(m, index + s + 1,  index + 1,      norms[3]);
+        compute_face_norm(m, index + s,      index + s + 1,  norms[4]);
+        compute_face_norm(m, index - 1,      index + s,      norms[5]);
+
+        vec3 avg = { 0.f, 0.f, 0.f };
+
+        for (int j = 0; j < 6; ++j)
+            glm_vec3_add(avg, norms[j], avg);
+
+        glm_vec3_scale(avg, 1.f / 6.f, m->verts[index].norm);
+    }
+}
+
 
 void mesh_construct(struct Mesh *m)
 {
@@ -170,7 +210,7 @@ void mesh_construct(struct Mesh *m)
         {
             Vertex v = {
                 { (float)y * m->res, -.4f, (float)z * m->res },
-                { (float)y / m->size, (float)z / m->size, (float)z / m->size }
+                { 0.f, 1.f, 0.f }
             };
 
             m->verts[m->nverts++] = v;
@@ -214,7 +254,7 @@ void mesh_gen_springs(struct Mesh *m)
 
     size_t index = 0;
 
-    float k = 1200.f;
+    float k = 1000.f;
     float eq_len = m->res;
     float eq_len_diag = sqrtf(m->res * m->res * 2.f);
 

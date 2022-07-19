@@ -6,7 +6,7 @@
 
 typedef struct
 {
-    vec3 pos, col;
+    vec3 pos, norm;
 } Vertex;
 
 struct Mass
@@ -52,6 +52,8 @@ void mesh_free(struct Mesh *m);
 
 void mesh_update(struct Mesh *m, float dt);
 void mesh_render(struct Mesh *m, RenderInfo *ri);
+
+void mesh_calculate_normals(struct Mesh *m);
 
 void mesh_construct(struct Mesh *m);
 void mesh_gen_springs(struct Mesh *m);

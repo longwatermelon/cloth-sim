@@ -42,12 +42,10 @@ void prog_mainloop(struct Prog *p)
 
     struct Mesh *mesh = mesh_alloc();
 
-    float prev = glfwGetTime();
 
     while (!glfwWindowShouldClose(p->win))
     {
-        float dt = glfwGetTime() - prev;
-        prev = glfwGetTime();
+        float dt = .01f;
 
         double mx, my;
         glfwGetCursorPos(p->win, &mx, &my);
