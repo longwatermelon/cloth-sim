@@ -47,7 +47,7 @@ struct Mesh
     unsigned int vao, vb, ib;
 };
 
-struct Mesh *mesh_alloc();
+struct Mesh *mesh_alloc(int size, float res);
 void mesh_free(struct Mesh *m);
 
 void mesh_update(struct Mesh *m, float dt);

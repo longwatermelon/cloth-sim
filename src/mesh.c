@@ -30,11 +30,11 @@ void spring_force(struct Spring *s, struct Mass *m, vec3 out)
     glm_vec3_scale(diff, left, out);
 }
 
-struct Mesh *mesh_alloc()
+struct Mesh *mesh_alloc(int size, float res)
 {
     struct Mesh *m = malloc(sizeof(struct Mesh));
-    m->size = 100;
-    m->res = .5f;
+    m->size = size;
+    m->res = res;
 
     m->verts = 0;
     m->nverts = 0;
