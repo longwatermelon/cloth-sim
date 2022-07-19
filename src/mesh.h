@@ -50,7 +50,7 @@ struct Mesh
 struct Mesh *mesh_alloc(int size, float res);
 void mesh_free(struct Mesh *m);
 
-void mesh_update(struct Mesh *m, float dt);
+void mesh_update(struct Mesh *m, float dt, size_t *held, size_t nheld);
 void mesh_render(struct Mesh *m, RenderInfo *ri);
 
 void mesh_calculate_normals(struct Mesh *m);

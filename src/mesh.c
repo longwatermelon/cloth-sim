@@ -89,7 +89,7 @@ void mesh_free(struct Mesh *m)
 }
 
 
-void mesh_update(struct Mesh *m, float dt)
+void mesh_update(struct Mesh *m, float dt, size_t *held, size_t nheld)
 {
     for (size_t i = 0; i < m->nsprings; ++i)
     {
@@ -106,13 +106,21 @@ void mesh_update(struct Mesh *m, float dt)
     for (size_t i = 0; i < m->nmasses; ++i)
     {
         /* if (i == m->size * m->size - 1 || i == m->size * m->size - m->size) */
-        if (i == 35 || i == 1022)
-            continue;
+        bool cont = false;
+        for (size_t j = 0; j < nheld; ++j)
+        {
+            if (i == held[j])
+                cont = true;
+        }
+
+        if (cont) continue;
+        /* if (i == 35 || i == 1022) */
+        /*     continue; */
 
         {
             // gravity
-            vec3 g = { 0.f, -.098f, 0.f };
-            glm_vec3_add(m->masses[i].vel, g, m->masses[i].vel);
+            vec3 fg = { 0.f, -9.8f * m->masses[i].mass, 0.f };
+            mass_apply_force(&m->masses[i], fg, dt);
         }
 
         {

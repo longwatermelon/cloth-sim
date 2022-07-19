@@ -42,6 +42,8 @@ void prog_mainloop(struct Prog *p)
 
     struct Mesh *mesh = mesh_alloc(100, .5f);
 
+    size_t held[] = { 35, 1022 };
+
     while (!glfwWindowShouldClose(p->win))
     {
         float dt = .01f;
@@ -55,7 +57,7 @@ void prog_mainloop(struct Prog *p)
 
         prog_events(p);
 
-        mesh_update(mesh, dt);
+        mesh_update(mesh, dt, held, sizeof(held) / sizeof(size_t));
 
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
