@@ -119,7 +119,7 @@ void mesh_update(struct Mesh *m, float dt, size_t *held, size_t nheld)
 
         {
             // gravity
-            vec3 fg = { 0.f, -9.8f * m->masses[i].mass, 0.f };
+            vec3 fg = { 0.f, 10.f * -9.8f * m->masses[i].mass, 0.f };
             mass_apply_force(&m->masses[i], fg, dt);
         }
 
@@ -276,7 +276,7 @@ void mesh_gen_springs(struct Mesh *m)
 
     size_t index = 0;
 
-    float k = 1200.f;
+    float k = 1500.f;
     float eq_len = m->res;
     float eq_len_diag = sqrtf(m->res * m->res * 2.f);
 

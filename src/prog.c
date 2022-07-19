@@ -39,7 +39,7 @@ void prog_mainloop(struct Prog *p)
     double prev_mx, prev_my;
     glfwGetCursorPos(p->win, &prev_mx, &prev_my);
 
-    struct Mesh *mesh = mesh_alloc(100, .5f);
+    struct Mesh *mesh = mesh_alloc(50, 1.f);
 
     size_t held[] = { 35, 1022 };
 
