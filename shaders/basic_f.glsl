@@ -14,6 +14,6 @@ void main()
 
     float diff = max(dot(norm, normalize(vec3(1., -.5, 0.))), 0.);
 
-    FragColor = vec4(diff * vec3(.5, .5, 1.), 1.);
+    FragColor = vec4(diff * vec3(.8, .7, 1.), 1.);
 }
 
