@@ -164,13 +164,19 @@ void mesh_render(struct Mesh *m, RenderInfo *ri)
 static bool in_range(struct Mesh *m, size_t a, size_t b)
 {
     return a >= 0 && a < m->nverts &&
-           a >= 0 && a < m->nverts;
+           b >= 0 && b < m->nverts;
 }
 
-static void compute_face_norm(struct Mesh *m, size_t a, size_t b, vec3 out)
+static bool compute_face_norm(struct Mesh *m, size_t a, size_t b, vec3 out)
 {
     if (in_range(m, a, b))
+    {
         glm_vec3_cross(m->verts[a].pos, m->verts[b].pos, out);
+        return true;
+    }
+
+    glm_vec3_zero(out);
+    return false;
 }
 
 void mesh_calculate_normals(struct Mesh *m)
@@ -181,21 +187,29 @@ void mesh_calculate_normals(struct Mesh *m)
         int s = m->size;
 
         vec3 norms[6];
-        for (int i = 0; i < 6; ++i) glm_vec3_zero(norms[i]);
+        bool included[6];
 
-        compute_face_norm(m, index - s - 1,  index - 1,      norms[0]);
-        compute_face_norm(m, index - s,      index - s - 1,  norms[1]);
-        compute_face_norm(m, index + 1,      index - s,      norms[2]);
-        compute_face_norm(m, index + s + 1,  index + 1,      norms[3]);
-        compute_face_norm(m, index + s,      index + s + 1,  norms[4]);
-        compute_face_norm(m, index - 1,      index + s,      norms[5]);
+        included[0] = compute_face_norm(m, index - s - 1,  index - 1,      norms[0]);
+        included[1] = compute_face_norm(m, index - s,      index - s - 1,  norms[1]);
+        included[2] = compute_face_norm(m, index + 1,      index - s,      norms[2]);
+        included[3] = compute_face_norm(m, index + s + 1,  index + 1,      norms[3]);
+        included[4] = compute_face_norm(m, index + s,      index + s + 1,  norms[4]);
+        included[5] = compute_face_norm(m, index - 1,      index + s,      norms[5]);
 
         vec3 avg = { 0.f, 0.f, 0.f };
 
-        for (int j = 0; j < 6; ++j)
-            glm_vec3_add(avg, norms[j], avg);
+        int count = 0;
 
-        glm_vec3_scale(avg, 1.f / 6.f, m->verts[index].norm);
+        for (int j = 0; j < 6; ++j)
+        {
+            if (included[j])
+            {
+                glm_vec3_add(avg, norms[j], avg);
+                ++count;
+            }
+        }
+
+        glm_vec3_divs(avg, (float)count, m->verts[index].norm);
     }
 }
 
@@ -254,7 +268,7 @@ void mesh_gen_springs(struct Mesh *m)
 
     size_t index = 0;
 
-    float k = 1000.f;
+    float k = 1200.f;
     float eq_len = m->res;
     float eq_len_diag = sqrtf(m->res * m->res * 2.f);
 
